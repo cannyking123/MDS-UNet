@@ -1,0 +1,69 @@
+defaults:
+  - _self_
+  - config: qin
+#  - config: HiPaS
+
+hydra:
+  run:
+    dir: ${config.output_dir}/${hydra:job.name}-${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+config:
+  # data_path: '/nvme/tof_data/train/source/'
+  # gt_path: '/nvme/tof_data/train/label1/'
+  # pred_data_path: '/nvme/tof_data/test/source/'
+  # pred_gt_path: '/nvme/tof_data/test/label1/'
+  # data_path: "/disk/cyq/2025/cas2023/train/data"
+  # gt_path: "/disk/cyq/2025/cas2023/train/mask"
+  # pred_data_path: "/disk/cyq/2025/cas2023/test/data"
+  # pred_gt_path: "/disk/cyq/2025/cas2023/test/mask"
+#  data_path: "${hydra:runtime.cwd}/data/imagesTr1_HiPaS"  #源数据
+#  gt_path: "${hydra:runtime.cwd}/data/labelsTr1_HiPaS"  #标签
+  data_path: "${hydra:runtime.cwd}/data_select/imagesTr"  #源数据
+  gt_path_1: "${hydra:runtime.cwd}/data_select/labelsTr_1"  #标签
+  gt_path_2: "${hydra:runtime.cwd}/data_select/labelsTr_2"  #标签
+  gt_path : "${hydra:runtime.cwd}/data_onelabel/train_label/"
+
+  weights_1: "${hydra:runtime.cwd}/data_select/w1_0509"
+  weights_2: "${hydra:runtime.cwd}/data_select/w2_0509"
+#  weights : "${hydra:runtime.cwd}/data_onelabel/w_0509"
+
+  val_data_path: "${hydra:runtime.cwd}/data_select/val_image"
+  val_gt_path_1: "${hydra:runtime.cwd}/data_select/val_gt_1"
+  val_gt_path_2: "${hydra:runtime.cwd}/data_select/val_gt_2"
+  val_gt_path: "${hydra:runtime.cwd}/data_onelabel/val_label/"
+
+  pred_data_path:  "${hydra:runtime.cwd}/data_ctph/image" #测试数据"
+  pred_gt_path_1:  "${hydra:runtime.cwd}/data_ctph/l1"   #测试数据标签
+  pred_gt_path_2:  "${hydra:runtime.cwd}/data_ctph/l1"   #测试数据标签
+  pred_gt_path:  "${hydra:runtime.cwd}/data_ctph/l1"
+
+  init_type: 'kaiming'  # ['normal', 'xavier', 'xavier_uniform', 'kaiming', 'orthogonal', 'none]
+  aug: False  # True or False
+  epochs: 1000
+  epochs_per_checkpoint: 20
+  batch_size: 8
+  init_lr: 0.001
+
+  # === 学习率相关 ===
+
+  scheduler: "poly"          # ← 新增：使用 PolyLR
+  poly_power: 0.9            # ← 新增：多项式指数（常用 0.9）
+  poly_min_lr: 0          # ← 新增：训练最后一步的 lr（不想到 0 可设 1e-6）
+
+  scheduler_step_size: 50
+  scheduler_gamma: 0.9
+  cudnn_enabled: True
+  cudnn_benchmark: True
+  use_scheduler: True
+  gpu: "0,1"
+
+  job_name: ${hydra:job.name}
+  hydra_path: ${hydra:runtime.output_dir}
+  pos_ratio: 0.40
+
+  early_stop_patience: 7        # 连续 10 个验证窗口无提升则早停；0 表示关闭早停
+  early_stop_min_delta: 0.0005   # 至少提升 0.0005 才算“有提升”，避免噪声
+  validate_every: 5             # 每个 epoch 验证一次；改成 2/5 可降频
+
+
+
